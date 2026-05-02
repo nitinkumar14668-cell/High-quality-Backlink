@@ -35,6 +35,16 @@ const AUTO_SITES = [
   { name: 'CuteStat', url: 'https://{domain}.cutestat.com/', da: 61, spam: 1 },
   { name: 'Webstatsdomain', url: 'https://www.webstatsdomain.org/domains/{domain}/', da: 53, spam: 3 },
   { name: 'Ahrefs Checker', url: 'https://ahrefs.com/website-authority-checker/?input={domain}', da: 91, spam: 1 },
+  { name: 'Semrush', url: 'https://www.semrush.com/website/{domain}/overview/', da: 90, spam: 1 },
+  { name: 'Moz', url: 'https://moz.com/domain-analysis?site={domain}', da: 89, spam: 1 },
+  { name: 'Majestic', url: 'https://majestic.com/reports/site-explorer?q={domain}', da: 85, spam: 1 },
+  { name: 'Sitechecker', url: 'https://sitechecker.pro/seo-report/https://{domain}', da: 72, spam: 1 },
+  { name: 'Valvy', url: 'https://www.valvy.com/www/{domain}', da: 49, spam: 2 },
+  { name: 'StatsCrop', url: 'https://www.statscrop.com/www/{domain}', da: 60, spam: 1 },
+  { name: 'TalkReviews', url: 'https://www.talkreviews.com/{domain}', da: 48, spam: 3 },
+  { name: 'ReviewMac', url: 'https://www.reviewmac.com/{domain}', da: 51, spam: 2 },
+  { name: 'AboutUs', url: 'https://aboutus.com/{domain}', da: 65, spam: 2 },
+  { name: 'SiteInfo', url: 'https://siteinfo.com/{domain}', da: 55, spam: 1 },
 ];
 
 const MANUAL_SITES = [
@@ -98,13 +108,20 @@ export default function App() {
     for (let i = 0; i < initialResults.length; i++) {
       setResults(prev => prev.map((res, index) => index === i ? { ...res, status: 'pending' } : res));
       
-      // Simulate network request for backlink ping
-      await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1000));
-      
       try {
-        // We do a no-cors fetch to just trigger a GET request to the target site.
-        // It creates the profile/stat page on their server seamlessly.
-        fetch(initialResults[i].finalUrl, { mode: 'no-cors' }).catch(() => {});
+        // Real generation via actual network ping.
+        // We use mode 'no-cors' so the browser issues the GET request,
+        // which forces the target website's backend to process and log the URL.
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        
+        await fetch(initialResults[i].finalUrl, { 
+          mode: 'no-cors',
+          signal: controller.signal,
+          cache: 'no-store'
+        });
+        
+        clearTimeout(timeoutId);
         setResults(prev => prev.map((res, index) => index === i ? { ...res, status: 'success' } : res));
       } catch {
         setResults(prev => prev.map((res, index) => index === i ? { ...res, status: 'error' } : res));
